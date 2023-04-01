@@ -10,6 +10,7 @@ from sagemaker.predictor import csv_serializer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 
+##Comentario de prueba de edición
 ############Seteo variables iniciales Sagemaker y S3 
 role = get_execution_role()
 prefix = 'data'
