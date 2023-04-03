@@ -10,7 +10,6 @@ from sagemaker.predictor import csv_serializer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 
-##Comentario de prueba de edición
 ############Seteo variables iniciales Sagemaker y S3 
 role = get_execution_role()
 prefix = 'data'
@@ -19,7 +18,7 @@ bucket_name = 's3-labo-grupo-14-scoring-crediticio'
 my_region = boto3.session.Session().region_name
 s3 = boto3.resource('s3')
 
-############Lectura del CSV
+############Lectura del dataset
 df_read = pd.read_csv('s3://{}/{}/{}'.format(bucket_name,prefix,data_file_name))
 df_read
 
@@ -37,15 +36,12 @@ for i in df:
         df[i] = le.fit_transform(df[i])
     else:
         continue
-        
-df.info()
 
 ############Se transforman los valores de las columnas a float
 X = np.array(X).astype('float32')
 y = np.array(y).astype('float32')
-##np.set_printoptions(threshold=np.inf)
 
-############Se separa la data tanto para entrenamiento como para testeo
+############Se separa la data tanto de entrenamiento como de testeo
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.33, random_state = 0)
 
 import io
@@ -76,7 +72,7 @@ print('Uploaded training data location {}'.format(s3_test_data))
 output_location = 's3://{}/{}/output'.format(bucket, prefix)
 print('Training artifacts will be uploaded to {}'.format(output_location))
 
-############Configuración del algoritmo a utilizar de Sagemaker
+############Configuración del algoritmo a utilizar de Sagemaker (Linear Learner)
 role = get_execution_role()
 region = boto3.Session().region_name
 X_train.shape
@@ -97,8 +93,6 @@ linear.set_hyperparameters(
     mini_batch_size = 14
 )
 
-df.info
-
 ############Entrenamiento del modelo
 linear.fit({'train': s3_train_data, 'validation': s3_test_data})
 
@@ -114,7 +108,6 @@ result = linear_predictor.predict(X_test)
 result
 
 predictions = np.array([r['score'] for r in result['predictions']])
-predictions
 
 ############Limpieza endpoints y otros recursos usados en Sagemaker
 sagemaker.Session().delete_endpoint(linear_predictor.endpoint_name)
